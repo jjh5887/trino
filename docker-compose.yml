@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  trino-coordinator:
+    image: trinodb/trino:latest
+    container_name: trino-coordinator
+    hostname: coordinator
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino/coordinator:/etc/trino:ro
+      - trino-coordinator-data:/data
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xmx2G
+
+  trino-worker:
+    image: trinodb/trino:latest
+    container_name: trino-worker
+    hostname: worker
+    depends_on:
+      - trino-coordinator
+    ports:
+      - "8081:8080"  # 워커 포트(필요시 외부에 노출)
+    volumes:
+       - ./trino/worker:/etc/trino:ro
+       - trino-worker-data:/data
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xmx2G
+
+volumes:
+  trino-coordinator-data:
+  trino-worker-data:
