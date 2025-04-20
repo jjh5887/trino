@@ -1,5 +1,9 @@
 version: "3.8"
 
+secrets:
+  trino_shared_secret:
+    file: ./shared-secret.txt
+
 services:
   trino-coordinator:
     image: trinodb/trino:latest
@@ -10,10 +14,11 @@ services:
       - "8443:8443"
     volumes:
       - ./trino/coordinator:/etc/trino:ro
-      - ./trino/coordinator/certs/keystore.jks:/etc/trino/keystore.jks:ro
       - trino-coordinator-data:/data
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx2G
+    secrets:
+      - trino_shared_secret
 
   trino-worker:
     image: trinodb/trino:latest
@@ -28,6 +33,8 @@ services:
        - trino-worker-data:/data
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx2G
+    secrets:
+      - trino_shared_secret
 
 volumes:
   trino-coordinator-data:
