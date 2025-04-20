@@ -5,6 +5,20 @@ secrets:
     file: ./shared-secret.txt
 
 services:
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"  # HTTP 포트 (기본 포트)
+      - "9000:9000"  # Native TCP 포트 (기본 포트)
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse  # 데이터 영속화
+      - ./clickhouse/script:/docker-entrypoint-initdb.d  # 초기화 스크립트 폴더 마운트
+    environment:
+      - TZ=UTC
+    networks:
+      - trino-network
+
   trino-coordinator:
     image: trinodb/trino:latest
     container_name: trino-coordinator
@@ -19,6 +33,8 @@ services:
       - JAVA_TOOL_OPTIONS=-Xmx2G
     secrets:
       - trino_shared_secret
+    networks:
+      - trino-network
 
   trino-worker:
     image: trinodb/trino:latest
@@ -35,7 +51,15 @@ services:
       - JAVA_TOOL_OPTIONS=-Xmx2G
     secrets:
       - trino_shared_secret
+    networks:
+      - trino-network
 
 volumes:
   trino-coordinator-data:
   trino-worker-data:
+  clickhouse_data:
+    driver: local
+
+networks:
+  trino-network:
+    driver: bridge
