@@ -7,8 +7,10 @@ services:
     hostname: coordinator
     ports:
       - "8080:8080"
+      - "8443:8443"
     volumes:
       - ./trino/coordinator:/etc/trino:ro
+      - ./trino/coordinator/certs/keystore.jks:/etc/trino/keystore.jks:ro
       - trino-coordinator-data:/data
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx2G
